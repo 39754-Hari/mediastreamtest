@@ -4,8 +4,8 @@
   "description": "Basic Programmable Streams demo0",
   "main": "server.js",
   "scripts": {
-    "start": "forever start -a -o ./out.log -e ./err.log --uid 'mediaStream' server.js",
-    "test": "node server.js"
+    "test": "forever start -a -o ./out.log -e ./err.log --uid 'mediaStream' server.js",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
