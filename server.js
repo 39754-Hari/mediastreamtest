@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 var http = require('http');
+var toWav = require('audiobuffer-to-wav');
 // const speech = require("@google-cloud/speech");
 // const client = new speech.SpeechClient();
 var HttpDispatcher = require('httpdispatcher');
@@ -182,7 +183,8 @@ class TranscriptionStream {
         return;
       }
       this.getStream(data.media.payload);
-      console.log('Payload from Twilio:',message)
+      console.log('Payload from Twilio:',data.media.payload);
+      this.toMS(data.media.payload);
 // recognizeStream = client
 //           .streamingRecognize(request)
 //           .on("error", console.error)
@@ -212,6 +214,64 @@ class TranscriptionStream {
       return (timeSinceStreamCreated/1000) > 60;
     }
   }
+
+ toMS(payload){
+  
+"use strict";
+
+// pull in the required packages.
+var sdk = require("microsoft-cognitiveservices-speech-sdk");
+var fs = require("fs");
+
+// replace with your own subscription key,
+// service region (e.g., "westus"), and
+// the name of the file you want to run
+// through the speech recognizer.
+var subscriptionKey = process.env.Key;//"";
+var serviceRegion = "westus"; // e.g., "westus"
+var filename = toWav(payload); // 16000 Hz, Mono
+
+//console.log(subscriptionKey);
+
+// create the push stream we need for the speech sdk.
+var pushStream = sdk.AudioInputStream.createPushStream();
+
+// open the file and push it to the push stream.
+fs.createReadStream(filename).on('data', function(arrayBuffer) {
+  pushStream.write(arrayBuffer.buffer);
+}).on('end', function() {
+  pushStream.close();
+});
+
+// we are done with the setup
+//console.log("Now recognizing from: " + filename);
+
+// now create the audio-config pointing to our stream and
+// the speech config specifying the language.
+var audioConfig = sdk.AudioConfig.fromStreamInput(pushStream);
+var speechConfig = sdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+
+// setting the recognition language to English.
+speechConfig.speechRecognitionLanguage = "en-US";
+
+// create the speech recognizer.
+var recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+
+// start the recognizer and wait for a result.
+recognizer.recognizeOnceAsync(
+  function (result) {
+    console.log(result);
+
+    recognizer.close();
+    recognizer = undefined;
+  },
+  function (err) {
+    console.trace("err - " + err);
+
+    recognizer.close();
+    recognizer = undefined;
+  });
+}
 
   getStream(payload) {
     
