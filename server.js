@@ -182,6 +182,7 @@ class TranscriptionStream {
         return;
       }
       this.getStream(data.media.payload);
+      console.log('Payload from Twilio:',Buffer.from(payload))
 // recognizeStream = client
 //           .streamingRecognize(request)
 //           .on("error", console.error)
