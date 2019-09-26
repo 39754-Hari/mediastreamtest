@@ -229,7 +229,7 @@ var fs = require("fs");
 // through the speech recognizer.
 var subscriptionKey = process.env.Key;//"";
 var serviceRegion = "westus"; // e.g., "westus"
-var filename = toWav(payload); // 16000 Hz, Mono
+var filename = toWav(Buffer.from(payload, 'base64')); // 16000 Hz, Mono
 
 //console.log(subscriptionKey);
 
